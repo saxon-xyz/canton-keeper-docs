@@ -13,6 +13,8 @@ Canton's privacy model means no third party can observe your contracts or act on
 
 Canton Keeper solves this: one daemon, configurable via YAML, that handles any Daml contract lifecycle automation. No custom code per workflow, no Daml expertise required to operate.
 
+CK follows the same automation patterns used internally by [Splice](https://github.com/hyperledger-labs/splice) — polling jitter to prevent thundering herd across validators, silent retries for transient failures, and graceful reconnection on stream interruptions.
+
 **Financial benefits:**
 - **Earn Canton Coin rewards** — every transaction CK submits is tagged as a Featured App activity, earning rewards from the Canton Network reward pool
 - **Maximize transaction volume** — automated choices fire immediately when conditions are met, generating more rewarded transactions than manual operation
