@@ -139,9 +139,15 @@ jobs:
 
 ## Cantara Subscriptions
 
-Automates user onboarding for the Cantara subscription billing platform.
+Automates user onboarding and recurring billing for the Cantara subscription platform. Uses `$lookup` to resolve `OpenMiningRound` and `FeaturedAppRight` contract IDs at exercise time.
 
 ```yaml
+lookups:
+  - module: Splice.Round
+    entity: OpenMiningRound
+  - module: Splice.Amulet
+    entity: FeaturedAppRight
+
 defaults:
   pollIntervalMs: 10000
   deduplicationSeconds: 300
@@ -155,6 +161,27 @@ jobs:
     exercise:
       choice: UserServiceRequest_Accept
       args: {}
+
+  bill-subscriptions:
+    trigger: deadline
+    watch:
+      module: Cantara
+      entity: Subscription
+    when:
+      field: nextPaymentTime
+      condition: past
+    exercise:
+      choice: Subscription_MakePayment
+      args:
+        issuerTransferContext:
+          openMiningRound: "$lookup.Splice.Round:OpenMiningRound"
+          featuredAppRight: "$lookup.Splice.Amulet:FeaturedAppRight"
+        operatorTransferContext:
+          openMiningRound: "$lookup.Splice.Round:OpenMiningRound"
+          featuredAppRight: "$lookup.Splice.Amulet:FeaturedAppRight"
+        issuerRewardShare: null
+        subscriberRewardShare: null
+        operatorRewardShare: null
 ```
 
 Note: Recurring billing (`Subscription_MakePayment`) requires runtime contract lookups that will be supported in a future CK release.
