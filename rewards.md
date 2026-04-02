@@ -5,33 +5,23 @@ title: Canton Coin Rewards
 
 # Canton Coin Rewards
 
-Canton Keeper automatically discovers `FeaturedAppRight` contracts at startup. When found, every transaction includes a `FeaturedAppRight_CreateActivityMarker` command, tagging it for Canton Coin reward eligibility under the Featured App program.
+Canton Keeper is a Featured App on the Canton Network. Every transaction CK submits earns Canton Coin rewards from the network's reward pool.
 
 ## How It Works
 
-1. CK scans your active contracts at startup for a `FeaturedAppRight` where `provider` matches your `VENUE_PARTY`
-2. If found, every choice CK exercises includes an activity marker in the same transaction
-3. The Canton Network rewards pool distributes Canton Coins to marked transactions
-
-No manual configuration of contract IDs is needed.
+1. CK automates contract operations on your validator node
+2. Each transaction is tagged for the Featured App reward program
+3. Rewards are distributed automatically by the Canton Network
 
 ## Reward Split
 
-| Recipient | Share | Description |
-|-----------|-------|-------------|
-| Validator operator | 80% | The party running CK (`VENUE_PARTY`) |
-| Saxon Nodes | 20% | CK developer fee, consistent with NAAS pricing |
+| Recipient | Share |
+|-----------|-------|
+| Validator operator (you) | 80% |
+| Saxon Nodes (CK developer) | 20% |
 
-On Saxon's own nodes, 100% goes to Saxon.
+The Featured App reward pool significantly favours active applications until mid-2029, making early adoption especially valuable.
 
-The split is controlled by the `DEVELOPER_PARTY` environment variable:
-- **Third-party validators:** Set to Saxon's party ID for your network — your node gets 80%, Saxon gets 20%
-- **Saxon's own nodes:** Leave unset or set to the same as `VENUE_PARTY` — 100% to Saxon
+## More Transactions = More Rewards
 
-## Without Featured App Status
-
-CK runs normally without a `FeaturedAppRight` contract — it just won't tag transactions for rewards. You'll see this at startup:
-
-```
-INFO  [keeper] no FeaturedAppRight found — transactions will not earn rewards
-```
+The more jobs you configure, the more transactions CK generates, the more rewards you earn. See [Example Configs](examples) for ready-made automation configs.

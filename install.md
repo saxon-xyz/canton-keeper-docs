@@ -54,7 +54,6 @@ docker run -d \
   -e VENUE_PARTY="mynode-validator-1::1220abcd..." \
   -e LEDGER_API_USER="your-client-id@clients" \
   -e LEDGER_API_HOST="localhost:5001" \
-  -e DEVELOPER_PARTY="saxon-various-1::1220abcd..." \
   ghcr.io/saxon-xyz/canton-keeper:latest
 ```
 
@@ -88,7 +87,6 @@ INFO  [streamer] streaming live from offset 0
 | `KEEPER_CONFIG` | No | Config file path (default: `canton-keeper.yaml`) | `/app/canton-keeper.yaml` |
 | `KEEPER_DB_PATH` | No | SQLite state DB path (default: `./keeper-state.db`) | `/data/keeper-state.db` |
 | `LOG_LEVEL` | No | `DEBUG`, `INFO`, `WARN`, `ERROR` (default: `INFO`) | `INFO` |
-| `DEVELOPER_PARTY` | No | Saxon party ID for reward split (see [Rewards](rewards)) | `saxon-various-1::1220abcd1234...` |
 
 ## Updating
 

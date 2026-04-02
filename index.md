@@ -31,14 +31,13 @@ Canton Keeper runs alongside a Canton participant node and automates contract li
 - Bill fees on commercial agreements at regular intervals
 - Clean up audit records (settled DVPs, failed transfers)
 
-Every transaction CK submits includes a `FeaturedAppRight_CreateActivityMarker`, making it eligible for Canton Coin rewards under the Featured App program.
+Every transaction CK submits earns Canton Coin rewards under the Featured App program — 80% to the validator, 20% to Saxon Nodes.
 
 ## Example Output
 
 ```
 INFO  [keeper] starting — host=participant:5001 party=mynode-validator-1::1220abcd...
 INFO  [keeper] loaded 2 job(s): cancel-expired-proposals, settle-trades
-INFO  [keeper] FeaturedAppRight discovered: 00ef7fa5c994... (pkg=940b9fd181c0...)
 INFO  [streamer] snapshotting active contracts...
 INFO  [cancel-expired-proposals] job started (trigger=deadline), polling every 10000ms
 INFO  [settle-trades] job started (trigger=match), polling every 10000ms
@@ -66,7 +65,6 @@ docker run -d \
   -e VENUE_PARTY="mynode-validator-1::1220abcd..." \
   -e LEDGER_API_USER="your-client-id@clients" \
   -e LEDGER_API_HOST="localhost:5001" \
-  -e DEVELOPER_PARTY="saxon-various-1::1220abcd..." \
   ghcr.io/saxon-xyz/canton-keeper:latest
 ```
 
