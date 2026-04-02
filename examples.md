@@ -139,7 +139,11 @@ jobs:
 
 ## Cantara Subscriptions
 
-Automates user onboarding and recurring billing for the Cantara subscription platform. Uses `$lookup` to resolve `OpenMiningRound` and `FeaturedAppRight` contract IDs at exercise time.
+Automates subscription lifecycle for the Cantara billing platform. Based on user feedback from the Cantara Slack community:
+- Subscriptions with payments older than 30 days have expired locks needing manual unlock
+- Cancellations older than 30 days get stuck because locked amulets expired
+
+CK automates all of these operations.
 
 ```yaml
 lookups:
@@ -153,6 +157,7 @@ defaults:
   deduplicationSeconds: 300
 
 jobs:
+  # Auto-accept user service requests
   accept-user-service-requests:
     trigger: exists
     watch:
@@ -162,6 +167,7 @@ jobs:
       choice: UserServiceRequest_Accept
       args: {}
 
+  # Process recurring payments on time (prevents 30-day lock expiry)
   bill-subscriptions:
     trigger: deadline
     watch:
@@ -182,6 +188,15 @@ jobs:
         issuerRewardShare: null
         subscriberRewardShare: null
         operatorRewardShare: null
-```
 
-Note: Recurring billing (`Subscription_MakePayment`) requires runtime contract lookups that will be supported in a future CK release.
+  # Unlock expired locked amulets automatically
+  # (no more manual clicking on Reporting > Expired Locks page)
+  unlock-expired-locks:
+    trigger: exists
+    watch:
+      module: Splice.Amulet
+      entity: LockedAmulet
+    exercise:
+      choice: LockedAmulet_OwnerExpireLock
+      args: {}
+```
