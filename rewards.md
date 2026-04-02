@@ -28,21 +28,6 @@ The split is controlled by the `DEVELOPER_PARTY` environment variable:
 - **Third-party validators:** Set to Saxon's party ID for your network — your node gets 80%, Saxon gets 20%
 - **Saxon's own nodes:** Leave unset or set to the same as `VENUE_PARTY` — 100% to Saxon
 
-## Enabling Featured App Status
-
-### DevNet
-
-Self-feature through the Canton wallet UI:
-1. Open your validator's wallet
-2. Navigate to Featured Apps
-3. Enable Featured App status
-
-CK will detect the `FeaturedAppRight` contract on its next restart.
-
-### Mainnet
-
-Featured App status requires approval from the Canton Foundation's Tokenomics committee. Contact Saxon Nodes for guidance.
-
 ## Without Featured App Status
 
 CK runs normally without a `FeaturedAppRight` contract — it just won't tag transactions for rewards. You'll see this at startup:

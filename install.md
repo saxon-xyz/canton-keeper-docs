@@ -132,8 +132,6 @@ curl -s -X POST https://mynode.uk.auth0.com/oauth/token \
 
 **Stream disconnects:** Normal — CK automatically reconnects within 5 seconds.
 
-**No FeaturedAppRight found:** Enable Featured App status through the Canton wallet UI (DevNet) or apply via the Canton Foundation (mainnet). CK still runs without it — transactions just won't earn rewards.
-
 ## Support
 
 Contact Saxon Nodes for support.
