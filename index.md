@@ -13,6 +13,12 @@ Canton's privacy model means no third party can observe your contracts or act on
 
 Canton Keeper solves this: one daemon, configurable via YAML, that handles any Daml contract lifecycle automation. No custom code per workflow, no Daml expertise required to operate.
 
+**Financial benefits:**
+- **Earn Canton Coin rewards** — every transaction CK submits is tagged as a Featured App activity, earning rewards from the Canton Network reward pool
+- **Maximize transaction volume** — automated choices fire immediately when conditions are met, generating more rewarded transactions than manual operation
+- **Reduce operational cost** — no manual monitoring or intervention needed for routine contract lifecycle operations
+- **Featured App reward pool** — significantly favours active applications until mid-2029, making early adoption especially valuable
+
 ## What It Does
 
 Canton Keeper runs alongside a Canton participant node and automates contract lifecycle operations that would otherwise require manual intervention or custom code. Operators define automation rules in a YAML config file.
