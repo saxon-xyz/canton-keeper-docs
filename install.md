@@ -103,6 +103,40 @@ docker restart canton-keeper
 docker restart canton-keeper
 ```
 
+## Test It
+
+To verify CK is working end-to-end, generate test traffic. This creates a short-lived TradeProposal that CK automatically cancels after 30 seconds — producing a real ledger transaction.
+
+```bash
+docker run --rm --network host \
+  -e AUTH0_TOKEN_URL="https://mynode.uk.auth0.com/oauth/token" \
+  -e AUTH0_CLIENT_ID="your-client-id" \
+  -e AUTH0_CLIENT_SECRET="your-client-secret" \
+  -e LEDGER_API_AUDIENCE="https://ledger-api.canton.mynode.example.com" \
+  -e VENUE_PARTY="mynode-various-1::1220abcd..." \
+  -e LEDGER_API_USER="your-client-id@clients" \
+  -e LEDGER_API_HOST="localhost:5001" \
+  ghcr.io/saxon-xyz/canton-keeper:latest \
+  node dist/scripts/generate-traffic-k8s.js
+```
+
+Then check CK's logs:
+
+```bash
+docker logs canton-keeper --since 2m
+```
+
+You should see:
+
+```
+INFO  [store] created Obsidian.CantonSwap.V1:TradeProposal 0076f7e5...
+INFO  [cancel-expired-proposals] deadline passed for 0076f7e5..., exercising TradeProposal_Cancel
+INFO  [cancel-expired-proposals] TradeProposal_Cancel submitted for 0076f7e5...
+INFO  [store] archived Obsidian.CantonSwap.V1:TradeProposal 0076f7e5...
+```
+
+Requires the canton-swap DAR deployed on your node and the `canton-swap.yaml` example config.
+
 ## Kubernetes
 
 For Kubernetes deployments, download the example manifest:
