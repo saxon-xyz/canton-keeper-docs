@@ -13,7 +13,7 @@ title: Installation Guide
 
 ## Step 1: Get Your Credentials
 
-You need four values from your validator setup:
+You need these values from your validator setup:
 
 | Value | Where to find it | Example |
 |-------|-----------------|---------|
