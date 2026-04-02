@@ -21,7 +21,7 @@ You need four values from your validator setup:
 | Client ID | Your Auth0 M2M application settings | `aB1cD2eF3gH4iJ5kL6mN7oP8qR9sT0u` |
 | Client Secret | Your Auth0 M2M application settings | `xY9wV8uT7sR6qP5oN4mL3kJ2iH1gF0e...` |
 | Ledger API audience | Your participant's Auth0 API identifier | `https://ledger-api.canton.mynode.example.com` |
-| Party ID | Your validator party ID | `mynode-various-1::1220abcd1234...` |
+| Party ID | Your validator party ID | `mynode-validator-1::1220abcd1234...` |
 | Ledger API user | Usually `<client-id>@clients` | `aB1cD2eF3gH4iJ5kL6mN7oP8qR9sT0u@clients` |
 
 ## Step 2: Choose Your Jobs
@@ -51,7 +51,7 @@ docker run -d \
   -e AUTH0_CLIENT_ID="your-client-id" \
   -e AUTH0_CLIENT_SECRET="your-client-secret" \
   -e LEDGER_API_AUDIENCE="https://ledger-api.canton.mynode.example.com" \
-  -e VENUE_PARTY="mynode-various-1::1220abcd..." \
+  -e VENUE_PARTY="mynode-validator-1::1220abcd..." \
   -e LEDGER_API_USER="your-client-id@clients" \
   -e LEDGER_API_HOST="localhost:5001" \
   -e DEVELOPER_PARTY="saxon-various-1::1220abcd..." \
@@ -67,7 +67,7 @@ docker logs canton-keeper
 You should see:
 
 ```
-INFO  [keeper] starting — host=localhost:5001 party=mynode-various-1::1220...
+INFO  [keeper] starting — host=localhost:5001 party=mynode-validator-1::1220...
 INFO  [keeper] loaded 2 job(s): cancel-expired-proposals, settle-trades
 INFO  [keeper] FeaturedAppRight discovered: ...
 INFO  [streamer] snapshotting active contracts...
@@ -82,7 +82,7 @@ INFO  [streamer] streaming live from offset 0
 | `AUTH0_CLIENT_ID` | Yes | Service account client ID | `aB1cD2eF3gH4iJ5kL6mN7oP8qR9sT0u` |
 | `AUTH0_CLIENT_SECRET` | Yes | Service account client secret | `xY9wV8uT7sR6qP5oN4mL3kJ2iH1gF0e...` |
 | `LEDGER_API_AUDIENCE` | Yes | Ledger API resource identifier | `https://ledger-api.canton.mynode.example.com` |
-| `VENUE_PARTY` | Yes | Operator party ID (Canton format) | `mynode-various-1::1220abcd1234...` |
+| `VENUE_PARTY` | Yes | Operator party ID (Canton format) | `mynode-validator-1::1220abcd1234...` |
 | `LEDGER_API_USER` | Yes | Ledger API user (JWT subject) | `aB1cD2eF3gH4iJ5kL6mN7oP8qR9sT0u@clients` |
 | `LEDGER_API_HOST` | No | Participant address (default: `participant:5001`) | `participant:5001` |
 | `KEEPER_CONFIG` | No | Config file path (default: `canton-keeper.yaml`) | `/app/canton-keeper.yaml` |
@@ -114,7 +114,7 @@ docker logs canton-keeper
 
 You should see:
 ```
-INFO  [keeper] starting — host=localhost:5001 party=mynode-various-1::1220...
+INFO  [keeper] starting — host=localhost:5001 party=mynode-validator-1::1220...
 INFO  [keeper] loaded N job(s): ...
 INFO  [streamer] snapshotting active contracts...
 INFO  [streamer] streaming live from offset 0

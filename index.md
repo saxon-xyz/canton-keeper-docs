@@ -36,7 +36,7 @@ Every transaction CK submits includes a `FeaturedAppRight_CreateActivityMarker`,
 ## Example Output
 
 ```
-INFO  [keeper] starting — host=participant:5001 party=mynode-various-1::1220abcd...
+INFO  [keeper] starting — host=participant:5001 party=mynode-validator-1::1220abcd...
 INFO  [keeper] loaded 2 job(s): cancel-expired-proposals, settle-trades
 INFO  [keeper] FeaturedAppRight discovered: 00ef7fa5c994... (pkg=940b9fd181c0...)
 INFO  [streamer] snapshotting active contracts...
@@ -63,7 +63,7 @@ docker run -d \
   -e AUTH0_CLIENT_ID="your-client-id" \
   -e AUTH0_CLIENT_SECRET="your-client-secret" \
   -e LEDGER_API_AUDIENCE="https://ledger-api.canton.mynode.example.com" \
-  -e VENUE_PARTY="mynode-various-1::1220abcd..." \
+  -e VENUE_PARTY="mynode-validator-1::1220abcd..." \
   -e LEDGER_API_USER="your-client-id@clients" \
   -e LEDGER_API_HOST="localhost:5001" \
   -e DEVELOPER_PARTY="saxon-various-1::1220abcd..." \
