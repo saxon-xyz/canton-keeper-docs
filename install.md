@@ -8,7 +8,7 @@ title: Installation Guide
 ## Prerequisites
 
 - A running Canton validator node with participant API on port 5001
-- Auth0 M2M credentials for the Ledger API
+- Auth0 or Keycloak credentials for the Ledger API
 - Docker installed on your validator node
 
 ## Step 1: Get Your Credentials
@@ -17,10 +17,10 @@ You need these values from your validator setup:
 
 | Value | Where to find it | Example |
 |-------|-----------------|---------|
-| Auth0 token URL | Your Auth0 domain + `/oauth/token` | `https://mynode.uk.auth0.com/oauth/token` |
-| Client ID | Your Auth0 M2M application settings | `aB1cD2eF3gH4iJ5kL6mN7oP8qR9sT0u` |
-| Client Secret | Your Auth0 M2M application settings | `xY9wV8uT7sR6qP5oN4mL3kJ2iH1gF0e...` |
-| Ledger API audience | Your participant's Auth0 API identifier | `https://ledger-api.canton.mynode.example.com` |
+| Token URL | Auth0: domain + `/oauth/token`. Keycloak: realm + `/protocol/openid-connect/token` | `https://mynode.uk.auth0.com/oauth/token` or `https://keycloak.example.com/realms/canton/protocol/openid-connect/token` |
+| Client ID | Your M2M application / service account settings | `aB1cD2eF3gH4iJ5kL6mN7oP8qR9sT0u` |
+| Client Secret | Your M2M application / service account settings | `xY9wV8uT7sR6qP5oN4mL3kJ2iH1gF0e...` |
+| Ledger API audience | Your participant's API identifier | `https://ledger-api.canton.mynode.example.com` |
 | Party ID | Your validator party ID | `mynode-validator-1::1220abcd1234...` |
 | Ledger API user | Usually `<client-id>@clients` | `aB1cD2eF3gH4iJ5kL6mN7oP8qR9sT0u@clients` |
 
