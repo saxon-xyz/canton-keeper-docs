@@ -200,3 +200,47 @@ jobs:
       choice: LockedAmulet_OwnerExpireLock
       args: {}
 ```
+
+## BitSafe CBTC
+
+Automates onboarding and credential lifecycle for [BitSafe](https://docs.bitsafe.finance/)'s wrapped Bitcoin token (CBTC) on Canton Network. Based on the BitSafe onboarding checklist:
+- Phase 3: Auto-accept credential user service requests
+- Phase 4: Auto-accept credential offers from BitSafe
+- Execute credential transfers without manual intervention
+
+```yaml
+defaults:
+  pollIntervalMs: 10000
+  deduplicationSeconds: 300
+
+jobs:
+  # Auto-accept credential offers from BitSafe (Phase 4)
+  accept-credential-offers:
+    trigger: exists
+    watch:
+      module: Utility.Credential.App.V0.Model.Offer
+      entity: CredentialOffer
+    exercise:
+      choice: CredentialOffer_AcceptFree
+      args: {}
+
+  # Auto-accept credential user service requests (Phase 3)
+  accept-credential-service:
+    trigger: exists
+    watch:
+      module: Utility.Credential.App.V0.Service.User
+      entity: UserServiceRequest
+    exercise:
+      choice: UserServiceRequest_Accept
+      args: {}
+
+  # Execute accepted credential transfers
+  execute-credential-transfers:
+    trigger: exists
+    watch:
+      module: Utility.Registry.V0.Holding.Transfer
+      entity: AcceptedTransfer
+    exercise:
+      choice: AcceptedTransfer_Execute
+      args: {}
+```
