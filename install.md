@@ -63,14 +63,45 @@ docker run -d \
 docker logs canton-keeper
 ```
 
-You should see:
+You should see CK start, resolve packages, snapshot contracts, and begin streaming:
 
 ```
-INFO  [keeper] starting — host=localhost:5001 party=mynode-validator-1::1220...
+INFO  [keeper] starting — host=localhost:5001 party=mynode-validator-1::1220abcd...
 INFO  [keeper] loaded 2 job(s): cancel-expired-proposals, settle-trades
-INFO  [keeper] FeaturedAppRight discovered: ...
+INFO  [packages] scanning 87 package(s) for module "Obsidian.CantonSwap.V1"
+INFO  [packages] found "Obsidian.CantonSwap.V1" in package 3f8a2b...
+INFO  [keeper] resolved Obsidian.CantonSwap.V1 → 3f8a2b...
+INFO  [keeper] FeaturedAppRight discovered: 00a1b2c3d4e5f6...  (pkg=7804375f...)
 INFO  [streamer] snapshotting active contracts...
-INFO  [streamer] streaming live from offset 0
+INFO  [streamer] ledger end offset: 000000000000001a47
+INFO  [streamer] snapshot complete at offset 000000000000001a47, store size: 12
+INFO  [streamer] streaming live from offset 000000000000001a47
+```
+
+If no FeaturedAppRight is registered for your validator, CK still runs normally:
+
+```
+INFO  [keeper] no FeaturedAppRight found — transactions will not earn rewards
+```
+
+To see per-poll detail, set `LOG_LEVEL=DEBUG`:
+
+```bash
+docker stop canton-keeper
+# Re-run the docker run command from Step 3 with -e LOG_LEVEL=DEBUG
+```
+
+```
+DEBUG [cancel-expired-proposals] tick: 3 contract(s)
+DEBUG [streamer] transaction at offset 000000000000001a48, 2 event(s)
+```
+
+When a contract matches a trigger, CK exercises the choice:
+
+```
+INFO  [cancel-expired-proposals] deadline passed for 007bc94ffd..., exercising TradeProposal_Cancel
+INFO  [cancel-expired-proposals] TradeProposal_Cancel submitted for 007bc94ffd...
+INFO  [store] archived Obsidian.CantonSwap.V1:TradeProposal 007bc94ffd...
 ```
 
 ## Environment Variables
@@ -102,40 +133,53 @@ docker restart canton-keeper
 docker restart canton-keeper
 ```
 
-## Test It
+## Health Check
 
-Check CK is running and connected:
-
-```bash
-docker logs canton-keeper
-```
-
-You should see:
-```
-INFO  [keeper] starting — host=localhost:5001 party=mynode-validator-1::1220...
-INFO  [keeper] loaded N job(s): ...
-INFO  [streamer] snapshotting active contracts...
-INFO  [streamer] streaming live from offset 0
-```
-
-To see CK actively processing contracts, set `LOG_LEVEL=DEBUG`:
+CK exposes an HTTP health endpoint on port 8080:
 
 ```bash
-docker stop canton-keeper
-# Re-run the docker run command from Step 3 with -e LOG_LEVEL=DEBUG
+curl http://localhost:8080/health
 ```
 
-You'll see tick logs showing how many contracts CK is watching:
-```
-DEBUG [my-job] tick: 3 contract(s)
+```json
+{"status":"healthy","streamActive":true,"contractCount":12,"offset":"000000000000001a47"}
 ```
 
-When a contract matches a trigger condition, CK will exercise the configured choice and you'll see:
+| Field | Meaning |
+|-------|---------|
+| `streamActive` | `true` when CK is connected to the participant and receiving updates |
+| `contractCount` | Number of contracts CK is tracking across all subscribed templates |
+| `offset` | Current ledger offset (increases with each transaction) |
+
+If using Kubernetes, the example manifest includes liveness and readiness probes pointed at this endpoint.
+
+## After a Network Upgrade
+
+When the Canton Network upgrades (e.g. Splice 0.5.17 to 0.5.18), package IDs change because new DAR versions are deployed. CK handles this automatically — it resolves all package IDs at startup by scanning the participant's package store.
+
+**What to do: restart CK.**
+
+```bash
+# Docker
+docker restart canton-keeper
+
+# Kubernetes
+kubectl -n canton rollout restart deployment canton-keeper
 ```
-INFO  [my-job] deadline passed for 00abcd..., exercising MyChoice
-INFO  [my-job] MyChoice submitted for 00abcd...
-INFO  [store] archived My.Module:MyTemplate 00abcd...
+
+After restart, check the logs for successful package resolution:
+
 ```
+INFO  [packages] scanning 94 package(s) for module "Obsidian.CantonSwap.V1"
+INFO  [packages] found "Obsidian.CantonSwap.V1" in package 9c4d7e...
+INFO  [keeper] resolved Obsidian.CantonSwap.V1 → 9c4d7e...
+INFO  [streamer] snapshot complete at offset 000000000000002b13, store size: 8
+INFO  [streamer] streaming live from offset 000000000000002b13
+```
+
+The new package ID (`9c4d7e...` instead of the previous `3f8a2b...`) confirms CK picked up the upgraded packages. No config changes required.
+
+**If a module is not found** after an upgrade, the DAR may not be installed on your participant yet. Check with your network operator.
 
 ## Kubernetes
 
@@ -157,14 +201,31 @@ kubectl -n canton apply -f canton-keeper-k8s.yaml
 
 **No jobs fire:** Set `-e LOG_LEVEL=DEBUG` to see poll ticks and contract counts.
 
-**Authentication errors:** Verify your Auth0 credentials work:
+**Authentication errors:** Verify your credentials work:
 ```bash
+# Auth0
 curl -s -X POST https://mynode.uk.auth0.com/oauth/token \
   -H "content-type: application/json" \
   -d '{"client_id":"...","client_secret":"...","audience":"...","grant_type":"client_credentials"}'
+
+# Keycloak
+curl -s -X POST https://keycloak.example.com/realms/canton/protocol/openid-connect/token \
+  -d "client_id=...&client_secret=...&grant_type=client_credentials"
 ```
 
-**Stream disconnects:** Normal — CK automatically reconnects within 5 seconds.
+**Module not found after upgrade:** The DAR hasn't been installed on your participant yet. CK will exit with:
+```
+fatal: No package found containing module "My.Module.V1"
+```
+Wait for the DAR to be deployed, then restart CK.
+
+**Stream disconnects:** Normal during participant restarts — CK automatically reconnects within 5 seconds:
+```
+ERROR [streamer] cycle failed (code=14): 14 UNAVAILABLE: Connection dropped
+WARN  [streamer] reconnecting in 5000ms
+INFO  [streamer] snapshotting active contracts...
+INFO  [streamer] streaming live from offset 000000000000002b15
+```
 
 ## Support
 
