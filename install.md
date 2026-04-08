@@ -26,7 +26,13 @@ You need these values from your validator setup:
 
 ## Step 2: Choose Your Jobs
 
-Download an example config:
+**Option A: Auto-discovery (recommended, zero-config)**
+
+CK automatically scans your participant's installed DARs and generates jobs for any recognized apps. No config file needed. Just skip to Step 3.
+
+**Option B: Manual config**
+
+Download an example config for specific apps:
 
 ```bash
 # For Canton Swap automation
@@ -37,6 +43,18 @@ curl -o canton-keeper.yaml {{ site.examples_url }}/utility-dars.yaml
 ```
 
 Or write your own — see the [Configuration Reference](config).
+
+**Option C: Both**
+
+Auto-discovery runs by default. Any manual jobs you add to `canton-keeper.yaml` take precedence over auto-discovered ones with the same name. To suppress a specific auto-discovered job:
+
+```yaml
+exclude:
+  - settle-otc-trades
+  - bill-base-fees
+```
+
+To disable auto-discovery entirely: `autoDiscover: false`
 
 ## Step 3: Run
 
@@ -63,17 +81,21 @@ docker run -d \
 docker logs canton-keeper
 ```
 
-You should see CK start, resolve packages, snapshot contracts, and begin streaming:
+You should see CK start, auto-discover apps, resolve packages, and begin streaming:
 
 ```
 INFO  [keeper] starting — host=localhost:5001 party=mynode-validator-1::1220abcd...
-INFO  [keeper] loaded 2 job(s): cancel-expired-proposals, settle-trades
-INFO  [packages] scanning 87 package(s) for module "Your.App.Module"
-INFO  [packages] found "Your.App.Module" in package 3f8a2b...
-INFO  [keeper] resolved Your.App.Module → 3f8a2b...
+INFO  [keeper] loaded 0 manual job(s)
+INFO  [discover] scanning 87 package(s) against 4 catalog app(s)
+INFO  [discover] found "utility-dars" (detected module: Utility.Settlement.App.V1.Model.Dvp)
+INFO  [discover] found "bitsafe-cbtc" (detected module: Utility.Credential.App.V0.Model.Offer)
+INFO  [discover] discovered 9 job(s) from 2 app(s)
+INFO  [keeper] auto-discovered 2 app(s): utility-dars, bitsafe-cbtc
+INFO  [keeper] total 9 job(s): settle-dvp, execute-accepted-mints, ...
+INFO  [packages] scanning 87 package(s) for module "Utility.Settlement.App.V1.Model.Dvp"
+INFO  [packages] found "Utility.Settlement.App.V1.Model.Dvp" in package 3f8a2b...
 INFO  [keeper] FeaturedAppRight discovered: 00a1b2c3d4e5f6...  (pkg=7804375f...)
 INFO  [streamer] snapshotting active contracts...
-INFO  [streamer] ledger end offset: 000000000000001a47
 INFO  [streamer] snapshot complete at offset 000000000000001a47, store size: 12
 INFO  [streamer] streaming live from offset 000000000000001a47
 ```
