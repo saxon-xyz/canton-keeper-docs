@@ -179,7 +179,15 @@ INFO  [streamer] streaming live from offset 000000000000002b13
 
 The new package ID (`9c4d7e...` instead of the previous `3f8a2b...`) confirms CK picked up the upgraded packages. No config changes required.
 
-**If a module is not found** after an upgrade, the DAR may not be installed on your participant yet. Check with your network operator.
+**If a module is not found** after an upgrade, CK retries 3 times over 90 seconds (the DAR may still be deploying). If still not found, CK skips that job and continues running the rest:
+
+```
+WARN  [packages] module "Your.App.Module" not found, retrying in 30s...
+ERROR [keeper] module "Your.App.Module" not found after retries — jobs using it will be skipped
+ERROR [keeper] skipping job "my-job" — missing module(s): Your.App.Module
+```
+
+Other jobs keep running normally. Once the DAR is deployed, restart CK to pick it up.
 
 ## Kubernetes
 
@@ -213,11 +221,7 @@ curl -s -X POST https://keycloak.example.com/realms/canton/protocol/openid-conne
   -d "client_id=...&client_secret=...&grant_type=client_credentials"
 ```
 
-**Module not found after upgrade:** The DAR hasn't been installed on your participant yet. CK will exit with:
-```
-fatal: No package found containing module "My.Module.V1"
-```
-Wait for the DAR to be deployed, then restart CK.
+**Module not found after upgrade:** CK retries 3 times (30s apart), then skips that job. Other jobs keep running. Once the DAR is deployed, restart CK.
 
 **Stream disconnects:** Normal during participant restarts — CK automatically reconnects within 5 seconds:
 ```
