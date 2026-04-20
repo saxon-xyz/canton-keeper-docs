@@ -213,20 +213,16 @@ Other jobs keep running normally. Once the DAR is deployed, restart CK to pick i
 
 ## Kubernetes — Helm (recommended)
 
-Most Canton validators are deployed via Helm. CK ships a chart alongside the source.
+The Helm chart is published as an OCI artifact on GHCR, alongside the Docker image.
 
 ```bash
-# 1. Clone the repo
-git clone https://github.com/saxon-xyz/canton-keeper.git
-cd canton-keeper
-
-# 2. Install with your validator party ID
-helm install canton-keeper ./helm/canton-keeper \
+helm install canton-keeper oci://ghcr.io/saxon-xyz/charts/canton-keeper \
+  --version 0.1.0 \
   -n canton \
   --set venueParty="mynode-validator-1::1220abcd..." \
   --set auth.tokenUrl="https://mynode.uk.auth0.com/oauth/token"
 
-# 3. Verify
+# Verify
 kubectl -n canton logs -l app=canton-keeper -f
 ```
 
