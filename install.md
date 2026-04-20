@@ -211,9 +211,38 @@ ERROR [keeper] skipping job "my-job" — missing module(s): Your.App.Module
 
 Other jobs keep running normally. Once the DAR is deployed, restart CK to pick it up.
 
-## Kubernetes
+## Kubernetes — Helm (recommended)
 
-For Kubernetes deployments, download the example manifest:
+Most Canton validators are deployed via Helm. CK ships a chart alongside the source.
+
+```bash
+# 1. Clone the repo
+git clone https://github.com/saxon-xyz/canton-keeper.git
+cd canton-keeper
+
+# 2. Install with your validator party ID
+helm install canton-keeper ./helm/canton-keeper \
+  -n canton \
+  --set venueParty="mynode-validator-1::1220abcd..." \
+  --set auth.tokenUrl="https://mynode.uk.auth0.com/oauth/token"
+
+# 3. Verify
+kubectl -n canton logs -l app=canton-keeper -f
+```
+
+The chart assumes the standard Splice secret `splice-app-validator-ledger-api-auth` exists in the namespace. Override with `--set auth.existingSecret=my-secret` if your auth secret has a different name.
+
+For custom values (disabling auto-discovery, manual jobs, custom storage class, etc.), use a values file:
+
+```bash
+helm install canton-keeper ./helm/canton-keeper -n canton -f values.yaml
+```
+
+See `helm/canton-keeper/values.yaml` for all available options.
+
+## Kubernetes — Raw manifest
+
+If you prefer not to use Helm, download the example manifest:
 
 ```bash
 curl -o canton-keeper-k8s.yaml {{ site.examples_url }}/k8s-deployment.yaml
