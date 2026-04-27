@@ -9,7 +9,7 @@ Zero-config automation daemon for Canton Network validators. Scans your particip
 
 ## Why You Need It
 
-Canton's privacy model means no third party can observe your contracts or act on your behalf. Unlike public blockchains where services like Chainlink Keepers can automate transactions for anyone, Canton requires automation to run on your own node with your own credentials. Every validator that wants automated settlement, expiry management, or recurring billing needs its own keeper daemon.
+Canton's privacy model means no third party can observe your contracts or act on your behalf. Unlike public blockchains where services like Chainlink Keepers can automate transactions for anyone, Canton requires automation to run on your own node with your own credentials. Every validator that wants automated settlement, expiry management, or recurring billing needs its own automation daemon.
 
 Saxon Automate solves this: one daemon that auto-discovers installed apps and handles any Daml contract lifecycle automation. Zero config to get started, YAML overrides when you need control. No custom code, no Daml expertise required.
 
@@ -38,13 +38,13 @@ Every transaction Saxon Automate submits earns Canton Coin rewards under the Fea
 ## Example Output
 
 ```
-INFO  [keeper] starting — host=participant:5001 party=mynode-validator-1::1220abcd...
-INFO  [keeper] loaded 0 manual job(s)
+INFO  [automate] starting — host=participant:5001 party=mynode-validator-1::1220abcd...
+INFO  [automate] loaded 0 manual job(s)
 INFO  [discover] scanning 87 package(s) against 4 catalog app(s)
 INFO  [discover] found "utility-dars" (detected module: Utility.Settlement.App.V1.Model.Dvp)
 INFO  [discover] discovered 6 job(s) from 1 app(s)
-INFO  [keeper] auto-discovered 1 app(s): utility-dars
-INFO  [keeper] total 6 job(s): settle-dvp, execute-accepted-mints, ...
+INFO  [automate] auto-discovered 1 app(s): utility-dars
+INFO  [automate] total 6 job(s): settle-dvp, execute-accepted-mints, ...
 INFO  [streamer] snapshotting active contracts...
 INFO  [streamer] streaming live from offset 000000000000001a47
 ...

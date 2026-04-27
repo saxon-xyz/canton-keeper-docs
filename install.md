@@ -84,17 +84,17 @@ docker logs saxon-automate
 You should see Saxon Automate start, auto-discover apps, resolve packages, and begin streaming:
 
 ```
-INFO  [keeper] starting — host=localhost:5001 party=mynode-validator-1::1220abcd...
-INFO  [keeper] loaded 0 manual job(s)
+INFO  [automate] starting — host=localhost:5001 party=mynode-validator-1::1220abcd...
+INFO  [automate] loaded 0 manual job(s)
 INFO  [discover] scanning 87 package(s) against 4 catalog app(s)
 INFO  [discover] found "utility-dars" (detected module: Utility.Settlement.App.V1.Model.Dvp)
 INFO  [discover] found "bitsafe-cbtc" (detected module: Utility.Credential.App.V0.Model.Offer)
 INFO  [discover] discovered 9 job(s) from 2 app(s)
-INFO  [keeper] auto-discovered 2 app(s): utility-dars, bitsafe-cbtc
-INFO  [keeper] total 9 job(s): settle-dvp, execute-accepted-mints, ...
+INFO  [automate] auto-discovered 2 app(s): utility-dars, bitsafe-cbtc
+INFO  [automate] total 9 job(s): settle-dvp, execute-accepted-mints, ...
 INFO  [packages] scanning 87 package(s) for module "Utility.Settlement.App.V1.Model.Dvp"
 INFO  [packages] found "Utility.Settlement.App.V1.Model.Dvp" in package 3f8a2b...
-INFO  [keeper] FeaturedAppRight discovered: 00a1b2c3d4e5f6...  (pkg=7804375f...)
+INFO  [automate] FeaturedAppRight discovered: 00a1b2c3d4e5f6...  (pkg=7804375f...)
 INFO  [streamer] snapshotting active contracts...
 INFO  [streamer] snapshot complete at offset 000000000000001a47, store size: 12
 INFO  [streamer] streaming live from offset 000000000000001a47
@@ -103,7 +103,7 @@ INFO  [streamer] streaming live from offset 000000000000001a47
 If no FeaturedAppRight is registered for your validator, Saxon Automate still runs normally:
 
 ```
-INFO  [keeper] no FeaturedAppRight found — transactions will not earn rewards
+INFO  [automate] no FeaturedAppRight found — transactions will not earn rewards
 ```
 
 To see per-poll detail, set `LOG_LEVEL=DEBUG`:
@@ -194,7 +194,7 @@ After restart, check the logs for successful package resolution:
 ```
 INFO  [packages] scanning 94 package(s) for module "Your.App.Module"
 INFO  [packages] found "Your.App.Module" in package 9c4d7e...
-INFO  [keeper] resolved Your.App.Module → 9c4d7e...
+INFO  [automate] resolved Your.App.Module → 9c4d7e...
 INFO  [streamer] snapshot complete at offset 000000000000002b13, store size: 8
 INFO  [streamer] streaming live from offset 000000000000002b13
 ```
@@ -205,8 +205,8 @@ The new package ID (`9c4d7e...` instead of the previous `3f8a2b...`) confirms Sa
 
 ```
 WARN  [packages] module "Your.App.Module" not found, retrying in 30s...
-ERROR [keeper] module "Your.App.Module" not found after retries — jobs using it will be skipped
-ERROR [keeper] skipping job "my-job" — missing module(s): Your.App.Module
+ERROR [automate] module "Your.App.Module" not found after retries — jobs using it will be skipped
+ERROR [automate] skipping job "my-job" — missing module(s): Your.App.Module
 ```
 
 Other jobs keep running normally. Once the DAR is deployed, restart Saxon Automate to pick it up.
