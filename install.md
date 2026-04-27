@@ -28,7 +28,7 @@ You need these values from your validator setup:
 
 **Option A: Auto-discovery (recommended, zero-config)**
 
-CK automatically scans your participant's installed DARs and generates jobs for any recognized apps. No config file needed. Just skip to Step 3.
+Saxon Automate automatically scans your participant's installed DARs and generates jobs for any recognized apps. No config file needed. Just skip to Step 3.
 
 **Option B: Manual config**
 
@@ -36,17 +36,17 @@ Download an example config for specific apps:
 
 ```bash
 # For Canton Swap automation
-curl -o canton-keeper.yaml {{ site.examples_url }}/canton-swap.yaml
+curl -o saxon-automate.yaml {{ site.examples_url }}/canton-swap.yaml
 
 # For DA Utility DAR automation
-curl -o canton-keeper.yaml {{ site.examples_url }}/utility-dars.yaml
+curl -o saxon-automate.yaml {{ site.examples_url }}/utility-dars.yaml
 ```
 
 Or write your own — see the [Configuration Reference](config).
 
 **Option C: Both**
 
-Auto-discovery runs by default. Any manual jobs you add to `canton-keeper.yaml` take precedence over auto-discovered ones with the same name. To suppress a specific auto-discovered job:
+Auto-discovery runs by default. Any manual jobs you add to `saxon-automate.yaml` take precedence over auto-discovered ones with the same name. To suppress a specific auto-discovered job:
 
 ```yaml
 exclude:
@@ -60,11 +60,11 @@ To disable auto-discovery entirely: `autoDiscover: false`
 
 ```bash
 docker run -d \
-  --name canton-keeper \
+  --name saxon-automate \
   --restart unless-stopped \
   --network host \
-  -v $(pwd)/canton-keeper.yaml:/app/canton-keeper.yaml \
-  -v canton-keeper-data:/data \
+  -v $(pwd)/saxon-automate.yaml:/app/saxon-automate.yaml \
+  -v saxon-automate-data:/data \
   -e AUTH0_TOKEN_URL="https://mynode.uk.auth0.com/oauth/token" \
   -e AUTH0_CLIENT_ID="your-client-id" \
   -e AUTH0_CLIENT_SECRET="your-client-secret" \
@@ -72,16 +72,16 @@ docker run -d \
   -e VENUE_PARTY="mynode-validator-1::1220abcd..." \
   -e LEDGER_API_USER="your-client-id@clients" \
   -e LEDGER_API_HOST="localhost:5001" \
-  ghcr.io/saxon-xyz/canton-keeper:latest
+  ghcr.io/saxon-xyz/saxon-automate:latest
 ```
 
 ## Step 4: Verify
 
 ```bash
-docker logs canton-keeper
+docker logs saxon-automate
 ```
 
-You should see CK start, auto-discover apps, resolve packages, and begin streaming:
+You should see Saxon Automate start, auto-discover apps, resolve packages, and begin streaming:
 
 ```
 INFO  [keeper] starting — host=localhost:5001 party=mynode-validator-1::1220abcd...
@@ -100,7 +100,7 @@ INFO  [streamer] snapshot complete at offset 000000000000001a47, store size: 12
 INFO  [streamer] streaming live from offset 000000000000001a47
 ```
 
-If no FeaturedAppRight is registered for your validator, CK still runs normally:
+If no FeaturedAppRight is registered for your validator, Saxon Automate still runs normally:
 
 ```
 INFO  [keeper] no FeaturedAppRight found — transactions will not earn rewards
@@ -109,7 +109,7 @@ INFO  [keeper] no FeaturedAppRight found — transactions will not earn rewards
 To see per-poll detail, set `LOG_LEVEL=DEBUG`:
 
 ```bash
-docker stop canton-keeper
+docker stop saxon-automate
 # Re-run the docker run command from Step 3 with -e LOG_LEVEL=DEBUG
 ```
 
@@ -118,7 +118,7 @@ DEBUG [cancel-expired-proposals] tick: 3 contract(s)
 DEBUG [streamer] transaction at offset 000000000000001a48, 2 event(s)
 ```
 
-When a contract matches a trigger, CK exercises the choice:
+When a contract matches a trigger, Saxon Automate exercises the choice:
 
 ```
 INFO  [cancel-expired-proposals] deadline passed for 007bc94ffd..., exercising Proposal_Cancel
@@ -137,27 +137,27 @@ INFO  [store] archived Your.App.Module:Proposal 007bc94ffd...
 | `VENUE_PARTY` | Yes | Operator party ID (Canton format) | `mynode-validator-1::1220abcd1234...` |
 | `LEDGER_API_USER` | Yes | Ledger API user (JWT subject) | `aB1cD2eF3gH4iJ5kL6mN7oP8qR9sT0u@clients` |
 | `LEDGER_API_HOST` | No | Participant address (default: `participant:5001`) | `participant:5001` |
-| `KEEPER_CONFIG` | No | Config file path (default: `canton-keeper.yaml`) | `/app/canton-keeper.yaml` |
-| `KEEPER_DB_PATH` | No | SQLite state DB path (default: `./keeper-state.db`) | `/data/keeper-state.db` |
+| `AUTOMATE_CONFIG` | No | Config file path (default: `saxon-automate.yaml`) | `/app/saxon-automate.yaml` |
+| `AUTOMATE_DB_PATH` | No | SQLite state DB path (default: `./automate-state.db`) | `/data/automate-state.db` |
 | `LOG_LEVEL` | No | `DEBUG`, `INFO`, `WARN`, `ERROR` (default: `INFO`) | `INFO` |
 
 ## Updating
 
 ```bash
-docker pull ghcr.io/saxon-xyz/canton-keeper:latest
-docker restart canton-keeper
+docker pull ghcr.io/saxon-xyz/saxon-automate:latest
+docker restart saxon-automate
 ```
 
 ## Updating Your Config
 
 ```bash
-# Edit canton-keeper.yaml, then restart
-docker restart canton-keeper
+# Edit saxon-automate.yaml, then restart
+docker restart saxon-automate
 ```
 
 ## Health Check
 
-CK exposes an HTTP health endpoint on port 8080:
+Saxon Automate exposes an HTTP health endpoint on port 8080:
 
 ```bash
 curl http://localhost:8080/health
@@ -169,24 +169,24 @@ curl http://localhost:8080/health
 
 | Field | Meaning |
 |-------|---------|
-| `streamActive` | `true` when CK is connected to the participant and receiving updates |
-| `contractCount` | Number of contracts CK is tracking across all subscribed templates |
+| `streamActive` | `true` when Saxon Automate is connected to the participant and receiving updates |
+| `contractCount` | Number of contracts Saxon Automate is tracking across all subscribed templates |
 | `offset` | Current ledger offset (increases with each transaction) |
 
 If using Kubernetes, the example manifest includes liveness and readiness probes pointed at this endpoint.
 
 ## After a Network Upgrade
 
-When the Canton Network upgrades (e.g. Splice 0.5.17 to 0.5.18), package IDs change because new DAR versions are deployed. CK handles this automatically — it resolves all package IDs at startup by scanning the participant's package store.
+When the Canton Network upgrades (e.g. Splice 0.5.17 to 0.5.18), package IDs change because new DAR versions are deployed. Saxon Automate handles this automatically — it resolves all package IDs at startup by scanning the participant's package store.
 
-**What to do: restart CK.**
+**What to do: restart Saxon Automate.**
 
 ```bash
 # Docker
-docker restart canton-keeper
+docker restart saxon-automate
 
 # Kubernetes
-kubectl -n canton rollout restart deployment canton-keeper
+kubectl -n canton rollout restart deployment saxon-automate
 ```
 
 After restart, check the logs for successful package resolution:
@@ -199,9 +199,9 @@ INFO  [streamer] snapshot complete at offset 000000000000002b13, store size: 8
 INFO  [streamer] streaming live from offset 000000000000002b13
 ```
 
-The new package ID (`9c4d7e...` instead of the previous `3f8a2b...`) confirms CK picked up the upgraded packages. No config changes required.
+The new package ID (`9c4d7e...` instead of the previous `3f8a2b...`) confirms Saxon Automate picked up the upgraded packages. No config changes required.
 
-**If a module is not found** after an upgrade, CK retries 3 times over 90 seconds (the DAR may still be deploying). If still not found, CK skips that job and continues running the rest:
+**If a module is not found** after an upgrade, Saxon Automate retries 3 times over 90 seconds (the DAR may still be deploying). If still not found, Saxon Automate skips that job and continues running the rest:
 
 ```
 WARN  [packages] module "Your.App.Module" not found, retrying in 30s...
@@ -209,21 +209,21 @@ ERROR [keeper] module "Your.App.Module" not found after retries — jobs using i
 ERROR [keeper] skipping job "my-job" — missing module(s): Your.App.Module
 ```
 
-Other jobs keep running normally. Once the DAR is deployed, restart CK to pick it up.
+Other jobs keep running normally. Once the DAR is deployed, restart Saxon Automate to pick it up.
 
 ## Kubernetes — Helm (recommended)
 
 The Helm chart is published as an OCI artifact on GHCR, alongside the Docker image.
 
 ```bash
-helm install canton-keeper oci://ghcr.io/saxon-xyz/charts/canton-keeper \
+helm install saxon-automate oci://ghcr.io/saxon-xyz/charts/saxon-automate \
   --version 0.1.0 \
   -n canton \
   --set venueParty="mynode-validator-1::1220abcd..." \
   --set auth.tokenUrl="https://mynode.uk.auth0.com/oauth/token"
 
 # Verify
-kubectl -n canton logs -l app=canton-keeper -f
+kubectl -n canton logs -l app=saxon-automate -f
 ```
 
 The chart assumes the standard Splice secret `splice-app-validator-ledger-api-auth` exists in the namespace. Override with `--set auth.existingSecret=my-secret` if your auth secret has a different name.
@@ -231,25 +231,25 @@ The chart assumes the standard Splice secret `splice-app-validator-ledger-api-au
 For custom values (disabling auto-discovery, manual jobs, custom storage class, etc.), use a values file:
 
 ```bash
-helm install canton-keeper ./helm/canton-keeper -n canton -f values.yaml
+helm install saxon-automate ./helm/saxon-automate -n canton -f values.yaml
 ```
 
-See `helm/canton-keeper/values.yaml` for all available options.
+See `helm/saxon-automate/values.yaml` for all available options.
 
 ## Kubernetes — Raw manifest
 
 If you prefer not to use Helm, download the example manifest:
 
 ```bash
-curl -o canton-keeper-k8s.yaml {{ site.examples_url }}/k8s-deployment.yaml
+curl -o saxon-automate-k8s.yaml {{ site.examples_url }}/k8s-deployment.yaml
 ```
 
 Then edit the placeholder values and apply:
 
 ```bash
-kubectl -n canton create configmap canton-keeper-config \
-  --from-file=canton-keeper.yaml=canton-keeper.yaml
-kubectl -n canton apply -f canton-keeper-k8s.yaml
+kubectl -n canton create configmap saxon-automate-config \
+  --from-file=saxon-automate.yaml=saxon-automate.yaml
+kubectl -n canton apply -f saxon-automate-k8s.yaml
 ```
 
 ## Troubleshooting
@@ -268,9 +268,9 @@ curl -s -X POST https://keycloak.example.com/realms/canton/protocol/openid-conne
   -d "client_id=...&client_secret=...&grant_type=client_credentials"
 ```
 
-**Module not found after upgrade:** CK retries 3 times (30s apart), then skips that job. Other jobs keep running. Once the DAR is deployed, restart CK.
+**Module not found after upgrade:** Saxon Automate retries 3 times (30s apart), then skips that job. Other jobs keep running. Once the DAR is deployed, restart Saxon Automate.
 
-**Stream disconnects:** Normal during participant restarts — CK automatically reconnects within 5 seconds:
+**Stream disconnects:** Normal during participant restarts — Saxon Automate automatically reconnects within 5 seconds:
 ```
 ERROR [streamer] cycle failed (code=14): 14 UNAVAILABLE: Connection dropped
 WARN  [streamer] reconnecting in 5000ms

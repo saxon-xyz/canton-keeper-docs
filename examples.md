@@ -143,7 +143,7 @@ Automates subscription lifecycle for the Cantara billing platform. Based on user
 - Subscriptions with payments older than 30 days have expired locks needing manual unlock
 - Cancellations older than 30 days get stuck because locked amulets expired
 
-CK automates all of these operations.
+Saxon Automate automates all of these operations.
 
 ```yaml
 lookups:

@@ -5,7 +5,7 @@ title: Configuration Reference
 
 # Configuration Reference
 
-Jobs are defined in `canton-keeper.yaml`:
+Jobs are defined in `saxon-automate.yaml`:
 
 ```yaml
 defaults:
@@ -151,7 +151,7 @@ jobs:
         roundPrice: "$lookup.Splice.Round:OpenMiningRound.amuletPrice"
 ```
 
-Templates listed under `lookups` are automatically streamed by CK.
+Templates listed under `lookups` are automatically streamed by Saxon Automate.
 
 ## Paused Jobs
 
@@ -166,7 +166,7 @@ jobs:
 
 ## Resilience
 
-CK includes Splice-style resilience for reliable operation across 1000+ validators:
+Saxon Automate includes Splice-style resilience for reliable operation across 1000+ validators:
 
 - **Polling jitter** (default 0.2): randomizes poll intervals ±10% to prevent thundering herd
 - **Silent retries** (default 3): transient failures logged at debug level; errors only after consecutive failures exceed threshold
