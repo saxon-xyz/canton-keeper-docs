@@ -24,4 +24,6 @@ Saxon runs PQS for you and puts a clean, authenticated **HTTP query API** in fro
 
 This is the **read/query** side of a validator's tooling, complementary to the [automation daemon](index)'s actuation side. The daemon acts on contracts; the Query API lets you and your apps see and report on them at scale.
 
+For **fast live current-state reads** (single-digit-millisecond, in-memory) rather than indexed history and analytics, see the [Ledger Follower](ledger-follower) — the complementary read path to this PQS-backed API. Rule of thumb: PQS for history, audit, and heavy queries; the follower for hot-path "is this contract active / has my write landed" lookups.
+
 > **Integration:** the API surface, authentication, and the view/endpoint reference are provided per deployment. Contact Saxon for access.
