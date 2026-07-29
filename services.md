@@ -10,6 +10,8 @@ Saxon operates a small family of services that run beside a Canton Network valid
 | Service | Job |
 |---|---|
 | **[Automation daemon](index)** | Act on contracts. Auto-discovers installed apps and exercises choices on triggers — deadlines, settlement matching, contract existence, intervals. |
+| **[Traffic Top-Up](traffic-topup)** | Keep one node able to submit. Buys CIP-0104 synchronizer traffic before the balance runs dry — and see that page for why we recommend leaving the validator-app's own loop in place. |
+| **[Fleet-Watchdog](fleet-watchdog)** | Keep a *fleet* able to submit. Cross-member traffic rescue plus a Canton Coin balance alarm — the safety net a single node's own loop structurally cannot be. |
 | **[External-Party Onboarding](external-party-onboarding)** | Onboard self-custody end-user parties at signup. The user's key signs in the middle of a two-call handshake, so it never reaches the participant. |
 | **[Ledger Follower](ledger-follower)** | Read *current* state on a hot path. Active contracts, contract/key lookup, runtime template and schema discovery, and correct read-after-write. |
 | **[Query API (PQS)](query-api)** | Read *history*. A durable, SQL-queryable projection for reporting and long-range queries. |

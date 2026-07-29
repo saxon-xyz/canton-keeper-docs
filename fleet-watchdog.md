@@ -7,6 +7,8 @@ title: Fleet-Watchdog
 
 [Traffic auto-top-up](traffic-topup) keeps a single node's synchronizer traffic funded. The fleet-watchdog is the layer above it: it watches a *set* of validators and steps in when one is heading for trouble its own top-up loop can't fix alone.
 
+(For steady-state per-node funding we recommend leaving the validator-app's own in-process loop enabled — see [Traffic Top-Up](traffic-topup). The fleet-watchdog is not a replacement for it; it covers what no per-node loop can see or do for itself.)
+
 Two problems it covers.
 
 ## Cross-member traffic rescue
