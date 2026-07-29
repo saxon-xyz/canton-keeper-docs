@@ -23,11 +23,15 @@ Five capabilities, each on its own page:
 4. **External-party onboarding** — [stand up self-custody (external) parties](external-party-onboarding) for your end users at signup via a simple API; the user's key never leaves your custody.
 5. **Ledger reads** — two complementary read layers: the [Query API](query-api) over PQS (indexed SQL/HTTP, full history) and the [Ledger Follower](ledger-follower) (in-memory ACS mirror, single-digit-millisecond live reads).
 
+See [Services](services) for how these divide up and which you need.
+
 **Financial benefits:**
 - **Earn Canton Coin rewards** — for a registered Featured App, the transactions Saxon Automate submits earn Canton Coin rewards from the network reward pool. Saxon Automate keeps that rewarded volume flowing automatically.
 - **Maximize transaction volume** — automated choices fire immediately when conditions are met, generating more rewarded transactions than manual operation.
 - **Reduce operational cost** — no manual monitoring or intervention needed for routine contract lifecycle operations.
 - **Featured App program** — the reward pool is front-loaded toward active applications in the network's early years. Featured App status isn't automatic, though: it requires a `FeaturedAppRight` and, under CIP-0116, locking a Canton Coin stake (App-provider tier) to activate and maintain reward eligibility. Saxon helps you set this up.
+
+How large those rewards actually are is set by the network, not by your app, and traffic is a real cost against them — [Rewards](rewards) covers what governs the size, including the per-round minimum below which a round pays nothing.
 
 ## Example Output
 
@@ -73,16 +77,18 @@ See the full [Installation Guide](install) for details.
 ## Pages
 
 - [Installation Guide](install) — Step-by-step setup for Docker and Kubernetes
+- [Services](services) — The service surfaces at a glance, and which one fits your need
 - [Configuration Reference](config) — Trigger types, field paths, and argument expressions
 - [Imported Actions](imported-actions) — Plug in custom JS/TS functions for workloads that don't fit a single choice exercise (multi-step orchestration, ledger-derived choice args, CIP-56 settlement)
 - [Traffic Top-Up](traffic-topup) — Auto-purchase CIP-0104 synchronizer traffic when the operator's balance runs low
 - [Fleet-Watchdog](fleet-watchdog) — Fleet-level liveness: cross-member traffic rescue and a Canton Coin balance alarm
 - [External-Party Onboarding](external-party-onboarding) — Onboard self-custody (external) end-user parties at signup via a simple API
-- [Query API (PQS)](query-api) — Query your validator's ledger state in SQL/HTTP, incrementally indexed
-- [Ledger Follower](ledger-follower) — Fast, in-memory current-state reads; the live counterpart to the PQS Query API
+- [Query API (PQS)](query-api) — Query your validator's ledger state in SQL/HTTP, incrementally indexed (history and reporting)
+- [Ledger Follower](ledger-follower) — Fast, in-memory current-state reads with runtime template/schema discovery; the live counterpart to the PQS Query API
 - [Example Configs](examples) — Ready-made configs for DA Utility DARs, Cantara, BitSafe CBTC, and traffic top-up
 - [Canton Coin Rewards](rewards) — How Saxon Automate earns rewards, and how the CIP-0104 model changes them
 - [Operator Tips](operator-tips) — Canton/Splice platform quirks worth knowing
+- [Security](security) — Credential handling, blast radius, and what the daemon can and cannot do
 - [Roadmap](roadmap) — Shipped, active, planned
 
 ## Support

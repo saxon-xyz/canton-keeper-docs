@@ -19,7 +19,7 @@ What's shipped, what's actively being built, what's planned.
 - **Traffic auto-top-up (CIP-0104).** New imported action `runTrafficTopup` monitors the operator's traffic balance via scan and submits `WalletAppInstall_CreateBuyTrafficRequest` when the balance falls below a configured threshold. The validator-app's internal wallet automation completes the buy on-ledger. Paused-by-default in the catalog; `TRAFFIC_TOPUP_ALLOW_LIVE=true` in env to leave shadow mode. See [Traffic Top-Up](traffic-topup).
 - **External-party onboarding service.** A stateless API to onboard self-custody (external) end-user parties at signup: a two-call generate/submit handshake where the user's key signs in the middle, so the private key never leaves the operator's custody and never reaches the participant. Deterministic party id up front, idempotent, async-friendly. See [External-Party Onboarding](external-party-onboarding).
 - **Query API over PQS.** An authenticated read/query layer over the Daml Participant Query Store: ledger state (active contracts, balances, history) projected into typed, indexed views and served over SQL/HTTP, with offset-pinned snapshots for consistent reads. Read-only, runs beside the participant. See [Query API](query-api).
-- **Ledger Follower.** A read-only HTTP API backed by an in-memory mirror of the participant's active contract set — single-digit-millisecond current-state lookups that don't queue against the participant or trip its JSON-ACS element-count cap. Includes offset-aware `await`/`verify` helpers to confirm a write is projected before acting on it. The fast/live counterpart to the PQS Query API. See [Ledger Follower](ledger-follower).
+- **Ledger Follower.** A read-only HTTP API backed by an in-memory mirror of the participant's active contract set — single-digit-millisecond current-state lookups that don't queue against the participant or trip its JSON-ACS element-count cap. Paged active reads, contract and Daml-key lookup, runtime template discovery with authoritative payload schemas (so clients survive package upgrades instead of breaking on a stale package id), and offset-aware `await`/`verify` helpers to confirm a write is projected before acting on it. Optional materialized wallet views serve per-party balances, positions and activity feeds without scanning holdings per request. The fast/live counterpart to the PQS Query API. See [Ledger Follower](ledger-follower).
 - **Fleet-watchdog.** A fleet-level liveness layer above per-node traffic top-up: monitors every member's traffic headroom and has a healthy validator buy CIP-0104 traffic on behalf of one about to run dry (cross-member rescue), plus a Canton Coin balance alarm that warns before a payer wallet drains. See [Fleet-Watchdog](fleet-watchdog).
 
 ## Active
@@ -28,13 +28,13 @@ What's shipped, what's actively being built, what's planned.
 
 ## Planned
 
-- **Prometheus alerting rule pack.** The daemon already exposes Prometheus metrics (`billing_runs_total`, `outstanding_amount_cc`, `record_skip_total`); the alerting rules to consume them are next.
+- **Prometheus alerting rule pack.** The daemon already exposes Prometheus metrics — `saxon_automation_runs_total`, `saxon_automation_submissions_total`, `saxon_automation_skips_total`, `saxon_automation_provider_failures_total` and the `saxon_automation_run_duration_seconds` histogram; the alerting rules to consume them are next.
 
 ## Open questions
 
 These shape later work:
 
-- **CIP-0104 rewards semantics.** Traffic-based app rewards are approved but not yet live — the mechanism is in preview, and several pricing and accounting details are still under discussion at the network level. Until it lands, app rewards flow through the `FeaturedAppRight` activity-marker mechanism (see [Rewards](rewards)). Future Saxon Automate features may evolve as this settles.
+- **CIP-0104 rewards semantics.** Traffic-based app rewards are approved but **not yet live** — the mechanism is in preview, and it lands in increments rather than all at once. Free confirmations arrive early in that sequence; the switch that makes app rewards traffic-derived, replacing today's explicit activity markers and introducing a new reward-coupon contract, comes later. Until that switch, app rewards flow through the `FeaturedAppRight` activity-marker mechanism. Two accounting details materially affect what automation is worth, and both are set by network governance rather than by an app: a **per-round minimum below which an app's reward for that round is not paid at all**, and a **per-app activity weight**. See [Rewards](rewards). Saxon tracks these and keeps the automation aligned; expect this section to move as the increments ship.
 - **DAR vetting workflow on mainnet.** Mainnet DAR uploads require the Splice SV super-validator vote to vet a new package — `MissingVettedPackages` errors until the vote passes. Faster than waiting, but no automation hook yet.
 
 ## Versioning

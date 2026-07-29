@@ -174,7 +174,7 @@ If using Kubernetes, the example manifest includes liveness and readiness probes
 
 ## After a Network Upgrade
 
-When the Canton Network upgrades (e.g. Splice 0.5.17 to 0.5.18), package IDs change because new DAR versions are deployed. Saxon Automate handles this automatically — it resolves all package IDs at startup by scanning the participant's package store.
+When the Canton Network upgrades (any Splice release that ships new DARs), package IDs change because new DAR versions are deployed. Saxon Automate handles this automatically — it resolves all package IDs at startup by scanning the participant's package store.
 
 **What to do: restart Saxon Automate.**
 

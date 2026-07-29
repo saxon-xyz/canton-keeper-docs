@@ -5,9 +5,13 @@ title: Traffic Top-Up
 
 # Traffic Top-Up (CIP-0104)
 
-Post-CIP-0104, every transaction consumes synchronizer traffic. Validators that exhaust their traffic balance can't submit any commands until they buy more. Manual top-up is operationally painful on busy validators; the in-process loop shipped by Splice's validator-app has scale problems under load (concurrent state-row contention, log floods, can't react to load curves).
+Every transaction consumes synchronizer traffic, and a validator that exhausts its balance cannot submit anything at all until it buys more. So top-up is not an optimisation; it is the difference between a working node and a stalled one.
 
-Saxon Automate ships an [imported action](imported-actions) that monitors the operator's traffic balance and auto-purchases more before it runs out — small frequent purchases tuned to your validator's burn curve.
+**Start with the built-in loop.** Splice's validator-app ships its own in-process top-up loop (`ADDITIONAL_CONFIG_TOPUPS`, helm `topup.targetThroughput` + `minTopupInterval`). For keeping a single node's tank full it is the right mechanism and the one to use — it is in the same process as the wallet, it needs no extra moving parts, and in our own operation it does the job.
+
+What an in-process loop structurally *cannot* do is see past its own node. It cannot tell you that one validator in a fleet has a mis-set target, or that its top-up has been silently failing, or that a burn curve has changed shape since the target was chosen. That blind spot is where Saxon Automate's traffic action earns its place: as a **fleet-level watchdog** across many validators, and — where a static target genuinely doesn't fit a bursty burn curve — as a dynamic override on a specific node.
+
+The rest of this page documents the mechanism, so you can judge which of those two roles you actually need.
 
 ## How It Works
 
@@ -86,7 +90,7 @@ The action reuses the daemon's existing `AUTH0_*` / `LEDGER_API_AUDIENCE` creden
 
 - **`MEMBER_ID`** — the participant's member ID on the sequencer. Format: `PAR::<participant-name>::<namespace-fingerprint>`. Find via the participant admin API (`GetParticipantId`) or — quicker — by inspecting your own validator's traffic-status response from scan: any member-id that returns data is yours.
 - **`SYNCHRONIZER_ID`** — from your validator-app's config or via the JSON Ledger API at `/v2/state/connected-synchronizers`.
-- **`MIGRATION_ID`** — from your validator-app's helm/config (`canton.validator-apps.validator_backend.domain-migration-id` or `ADDITIONAL_CONFIG_MIGRATION_ID`). Often `0` on first install, `1`+ after a synchronizer migration.
+- **`MIGRATION_ID`** — from your validator-app's helm/config (`canton.validator-apps.validator_backend.domain-migration-id` or `ADDITIONAL_CONFIG_MIGRATION_ID`). It increments with each synchronizer migration, so it is **not** a small fixed number — MainNet has already migrated several times. Read it from your own config rather than assuming; a stale migration id makes the buy target the wrong synchronizer.
 
 ## Tuning the Gating Params
 
@@ -102,9 +106,16 @@ The right pattern is small-but-frequent rather than rare-and-huge: the network's
 
 ## Coexistence With the Built-In Topup Loop
 
-Splice's validator-app has its own internal traffic-top-up loop driven by `ADDITIONAL_CONFIG_TOPUPS` (helm `topup.targetThroughput` + `minTopupInterval`). This in-process loop is the "official" mechanism shipped by Splice today, but has scale problems under load: bursty block topups cause concurrent Postgres write contention against the same state rows, generating serialization-retry log floods. The built-in's `target-throughput` config can't react to load curves either — it forces stalls during synchronization rounds.
+**Our recommendation is to keep the built-in loop enabled.** It is the mechanism Splice ships, it lives in the same process as the wallet automation that completes the buy, and for per-node top-up it is sufficient. We run it.
 
-Saxon Automate's traffic-topup is the **external-daemon pattern** that the in-process loop can't be: dynamic threshold, small frequent purchases sized to recent burn, sidestepping the contention. The two coexist fine while operators evaluate Saxon Automate's topup. Long-term, the built-in can be disabled (`ADDITIONAL_CONFIG_TOPUPS` unset) once Saxon Automate has run reliably for a while.
+Two caveats are worth knowing, because they explain when an external actor helps:
+
+- Under heavy, bursty load, in-process block top-ups can contend on the same state rows and produce serialization-retry log noise.
+- `target-throughput` is a static target. If a node's burn curve is spiky rather than steady, a single figure is either too low during peaks or wasteful the rest of the time.
+
+Where either bites on a specific node, Saxon Automate's action can run alongside as a dynamic layer — the gates below (`minIntervalMs`, `maxInFlight`) exist so that two actors requesting buys don't stampede. Its more valuable role, though, is **fleet oversight**: one watcher across many validators that notices the node whose top-up has stopped working, which no per-node loop can do for itself.
+
+**Do not disable the built-in loop simply because Saxon Automate is running.** An earlier version of this page suggested that as a long-term goal; our own operational experience since does not support it. Removing the in-process safety net leaves a node dependent on an external daemon being healthy, which trades a small inefficiency for a real single point of failure.
 
 ## Gotchas
 
@@ -113,8 +124,10 @@ These come up rarely but cost time when they do:
 - **Daml `Int` must be JSON-string-encoded in choice args.** `migrationId` and `trafficAmount` sent as raw JSON numbers fail with `HTTP 500 "Expected ujson.Str (data: …)"`. Saxon Automate's submitter handles this internally; mentioned here for anyone reading the wire format or writing a similar integration.
 - **Scan's `target.total_purchased` lags `actual.total_limit` by ~60-90s after a buy completes.** The `inFlight = purchased - limit` formula can be briefly *negative* right after a successful topup completes (sequencer applies the new allowance before scan's purchased counter refreshes). Saxon Automate's decision gate (`inFlight > maxInFlight`) handles this correctly; code that asserts `inFlight >= 0` will spuriously fire.
 
-## Reward Implications
+## Cost, honestly
 
-Every `WalletAppInstall_CreateBuyTrafficRequest` submission is a Daml transaction that earns Canton Coin rewards under the Featured App program — same as any other transaction Saxon Automate submits. Auto-top-up is therefore not "operational cost" but a positive-yield activity: you spend a little CC on traffic, earn rewards on the submit, and avoid the bigger cost of validator stalls when traffic runs dry.
+A `WalletAppInstall_CreateBuyTrafficRequest` submission is itself a Daml transaction, so for a registered Featured App it is reward-eligible like any other. **That does not make buying traffic profitable, and it should not be presented as though it does.**
 
-See [Rewards](rewards) for the full accounting model.
+The purchase spends Canton Coin to acquire traffic; the reward earned on the single submission that requests it is small by comparison. Traffic is a real cost of operating, frequently the largest one for a busy validator — on transfer-heavy workloads it can consume the majority of gross rewards. The case for automating top-up is **avoiding the outage** that occurs when a validator's traffic runs dry and it can submit nothing at all, plus buying in small, frequent, well-sized amounts rather than over-provisioning allowances that go unused.
+
+Budget for traffic as a cost line. See [Rewards](rewards) for how reward size is actually determined, including the per-round minimum below which a round pays nothing.
